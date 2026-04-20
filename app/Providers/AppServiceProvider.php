@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator; // DÒNG NÀY CỰC KỲ QUAN TRỌNG, PHẢI NẰM Ở ĐÂY
+use Illuminate\Pagination\Paginator; // Nạp công cụ phân trang
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Sử dụng giao diện Tailwind cho thanh phân trang
-        Paginator::useTailwind(); 
+        // Ép Laravel dùng CSS của Tailwind cho các nút phân trang (1, 2, 3...)
+        Paginator::useTailwind();
     }
 }

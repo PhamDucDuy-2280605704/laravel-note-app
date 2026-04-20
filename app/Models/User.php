@@ -2,25 +2,37 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Contracts\Auth\MustVerifyEmail; // Import interface này
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail // Thêm implements vào đây
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Các cột được phép lưu dữ liệu.
+     */
+    protected $fillable = [
+        'name', 
+        'email', 
+        'password', 
+        'google_id', 
+        'email_verified_at',
+    ];
+
+    /**
+     * Các cột cần ẩn khi trả về dữ liệu.
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Ép kiểu dữ liệu cho các cột.
      */
     protected function casts(): array
     {
@@ -28,5 +40,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Liên kết: 1 User có nhiều Ghi chú.
+     */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class);
     }
 }
