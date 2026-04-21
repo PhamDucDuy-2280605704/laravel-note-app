@@ -7,23 +7,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Permission\Traits\HasRoles; // 1. Thêm dòng này
+use Spatie\Permission\Traits\HasRoles; // Quan trọng
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasRoles; // 2. Thêm HasRoles vào đây
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
-        'name', 
-        'email', 
-        'password', 
-        'google_id', 
-        'email_verified_at',
+        'name', 'email', 'password', 'google_id', 'email_verified_at',
     ];
 
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
     protected function casts(): array

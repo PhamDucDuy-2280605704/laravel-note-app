@@ -4,7 +4,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-8">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">Viết ghi chú mới ✨</h2>
                 
-                <form action="/luu-ghi-chu" method="POST">
+                <form action="{{ route('notes.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     
                     <div class="mb-6">
@@ -14,7 +14,9 @@
                                 required>
                             <option value="">-- Chọn một danh mục --</option>
                             @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
                             @endforeach
                         </select>
                         @error('category_id')
@@ -32,8 +34,17 @@
                         @enderror
                     </div>
 
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Đính kèm hình ảnh:</label>
+                        <input type="file" name="image" accept="image/*"
+                               class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        @error('image')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <div class="flex items-center justify-end space-x-4">
-                        <a href="/danh-sach" class="text-gray-500 hover:text-gray-700">Hủy bỏ</a>
+                        <a href="{{ route('notes.index') }}" class="text-gray-500 hover:text-gray-700">Hủy bỏ</a>
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300">
                             Lưu Ghi Chú
                         </button>

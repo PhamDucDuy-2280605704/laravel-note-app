@@ -2,48 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Laravel\Socialite\Facades\Socialite; // Quan trọng
+use Illuminate\Support\Facades\Auth;    // Quan trọng
+use Illuminate\Support\Str;             // Để dùng Str::random
 use Exception;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class GoogleController extends Controller
 {
+    /**
+     * Điều hướng người dùng sang Google
+     */
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
     }
 
+    /**
+     * Xử lý dữ liệu Google trả về
+     */
     public function handleGoogleCallback()
     {
         try {
-            $user = Socialite::driver('google')->user();
-            $finduser = User::where('email', $user->email)->first();
+            $googleUser = Socialite::driver('google')->user();
+            
+            // 1. Tìm xem email này đã có trong hệ thống chưa?
+            $user = User::where('email', $googleUser->email)->first();
 
-            if($finduser){
-                // Nếu User đã có, cập nhật ID Google nếu chưa có và đăng nhập
-                if(!$finduser->google_id){
-                    $finduser->update(['google_id' => $user->id]);
-                }
-                Auth::login($finduser);
-                return redirect()->intended('dashboard');
-            } else {
-                // Tạo User mới và tự động xác thực email
-                $newUser = User::create([
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'google_id'=> $user->id,
-                    'password' => Hash::make(Str::random(16)), // Pass ngẫu nhiên bảo mật
-                    'email_verified_at' => now(), 
+            if ($user) {
+                // Nếu đã có User (tạo bằng tay trước đó), cập nhật google_id để lần sau đồng bộ
+                $user->update([
+                    'google_id' => $googleUser->id,
                 ]);
-
-                Auth::login($newUser);
-                return redirect()->intended('dashboard');
+            } else {
+                // Nếu chưa có thì mới tạo mới hoàn toàn
+                $user = User::create([
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'google_id' => $googleUser->id,
+                    'password' => bcrypt(Str::random(16)), // Mật khẩu ngẫu nhiên để bảo mật
+                    'email_verified_at' => now(),           // Google xác thực rồi, không bắt user check mail nữa
+                ]);
+                
+                // Gán quyền mặc định là 'user'
+                $user->assignRole('user');
             }
+
+            // Đăng nhập vào hệ thống
+            Auth::login($user);
+
+            // Chuyển hướng về Dashboard
+            return redirect()->route('dashboard');
+
         } catch (Exception $e) {
-            return redirect('login')->with('error', 'Lỗi đăng nhập Google: ' . $e->getMessage());
+            // Log lỗi nếu cần: \Log::error($e->getMessage());
+            return redirect('/login')->with('error', 'Đăng nhập Google thất bại. Vui lòng thử lại!');
         }
     }
 }

@@ -10,7 +10,14 @@ class Note extends Model
 {
     use SoftDeletes; 
 
-    protected $fillable = ['content', 'user_id', 'category_id', 'is_pinned'];
+    // CẬP NHẬT: Thêm 'image' vào đây để Laravel cho phép lưu đường dẫn ảnh
+    protected $fillable = [
+        'content', 
+        'user_id', 
+        'category_id', 
+        'is_pinned', 
+        'image'
+    ];
 
     public function category(): BelongsTo
     {
