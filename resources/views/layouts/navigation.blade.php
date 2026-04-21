@@ -13,9 +13,20 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="/danh-sach" :active="request()->is('danh-sach')">
+                    <x-nav-link :href="route('notes.index')" :active="request()->routeIs('notes.*')">
                         {{ __('Ghi chú của tớ') }}
                     </x-nav-link>
+
+                    @role('admin')
+                        <div class="flex space-x-8 sm:-my-px sm:ms-4 border-l pl-4 border-gray-200">
+                            <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" class="text-red-600 font-bold">
+                                {{ __('Quản lý Người dùng') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('admin.notes.all')" :active="request()->routeIs('admin.notes.all')">
+                                {{ __('Tất cả ghi chú') }}
+                            </x-nav-link>
+                        </div>
+                    @endrole
                 </div>
             </div>
 
@@ -67,9 +78,20 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             
-            <x-responsive-nav-link href="/danh-sach" :active="request()->is('danh-sach')">
+            <x-responsive-nav-link :href="route('notes.index')" :active="request()->routeIs('notes.*')">
                 {{ __('Ghi chú của tớ') }}
             </x-responsive-nav-link>
+
+            @role('admin')
+                <div class="border-t border-red-100 bg-red-50 mt-2">
+                    <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" class="text-red-700 font-bold">
+                        {{ __('Quản lý Người dùng') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.notes.all')" :active="request()->routeIs('admin.notes.all')">
+                        {{ __('Tất cả ghi chú') }}
+                    </x-responsive-nav-link>
+                </div>
+            @endrole
         </div>
 
         @auth

@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail; // Import interface này
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Permission\Traits\HasRoles; // 1. Thêm dòng này
 
-class User extends Authenticatable implements MustVerifyEmail // Thêm implements vào đây
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles; // 2. Thêm HasRoles vào đây
 
-    /**
-     * Các cột được phép lưu dữ liệu.
-     */
     protected $fillable = [
         'name', 
         'email', 
@@ -23,17 +21,11 @@ class User extends Authenticatable implements MustVerifyEmail // Thêm implement
         'email_verified_at',
     ];
 
-    /**
-     * Các cột cần ẩn khi trả về dữ liệu.
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Ép kiểu dữ liệu cho các cột.
-     */
     protected function casts(): array
     {
         return [
@@ -42,9 +34,6 @@ class User extends Authenticatable implements MustVerifyEmail // Thêm implement
         ];
     }
 
-    /**
-     * Liên kết: 1 User có nhiều Ghi chú.
-     */
     public function notes(): HasMany
     {
         return $this->hasMany(Note::class);
