@@ -3,77 +3,54 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Livewire\WithPagination;
 use App\Models\Note;
 use App\Models\Category;
+use Livewire\WithFileUploads; // Bắt buộc phải có để upload ảnh
 use Illuminate\Support\Facades\Auth;
 
 class NoteManager extends Component
 {
-    use WithPagination;
+    use WithFileUploads;
 
-    // Các biến dùng chung
-    public $search = '';
+    public $noidung = '';
     public $categoryId = '';
-    public $noidung = ''; // Biến để thêm ghi chú mới
-
-    // Tự động reset về trang 1 khi lọc hoặc tìm kiếm
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingCategoryId() { $this->resetPage(); }
-
-    /**
-     * THÊM GHI CHÚ MỚI
-     */
-    public function store() {
+    public $image; // Biến tạm lưu file ảnh
+    
+    // Hàm lưu Task
+    public function store()
+    {
         $this->validate([
-            'noidung' => 'required|min:5|max:255',
-            'categoryId' => 'required|exists:categories,id',
+            'noidung' => 'required|min:3',
+            'categoryId' => 'required',
+            'image' => 'nullable|image|max:1024', // Ảnh tối đa 1MB
         ]);
+
+        $imagePath = null;
+        if ($this->image) {
+            // Lưu ảnh vào thư mục storage/app/public/notes
+            $imagePath = $this->image->store('notes', 'public');
+        }
 
         Auth::user()->notes()->create([
             'content' => $this->noidung,
             'category_id' => $this->categoryId,
+            'image' => $imagePath,
+            'status' => 'todo',
         ]);
 
-        $this->noidung = ''; // Xóa sạch ô nhập sau khi lưu
-        session()->flash('success', 'Đã thêm ghi chú mới! ✨');
+        // Reset form sau khi lưu
+        $this->reset(['noidung', 'categoryId', 'image']);
+        session()->flash('success', 'Đã thêm task mới thành công!');
     }
 
-    /**
-     * GHIM GHI CHÚ
-     */
-    public function pinNote($id) {
-        $note = Note::findOrFail($id);
-        if ($note->user_id === Auth::id()) {
-            $note->update(['is_pinned' => !$note->is_pinned]);
-        }
-    }
-
-    /**
-     * XÓA TẠM THỜI
-     */
-    public function deleteNote($id) {
-        $note = Note::findOrFail($id);
-        if ($note->user_id === Auth::id()) {
-            $note->delete();
-            session()->flash('success', 'Đã xóa tạm thời!');
-        }
-    }
-
-    public function render() {
-        $query = Auth::user()->notes()->with('category');
-
-        if ($this->search) {
-            $query->where('content', 'LIKE', "%{$this->search}%");
-        }
-
-        if ($this->categoryId) {
-            $query->where('category_id', $this->categoryId);
-        }
-
+    public function render()
+    {
+        $notes = Auth::user()->notes();
         return view('livewire.note-manager', [
-            'notes' => $query->orderBy('is_pinned', 'desc')->latest()->paginate(6),
-            'categories' => Category::all()
+            'categories' => Category::all(),
+            'todo' => (clone $notes)->where('status', 'todo')->latest()->get(),
+            'doing' => (clone $notes)->where('status', 'doing')->latest()->get(),
+            'done' => (clone $notes)->where('status', 'done')->latest()->get(),
         ]);
     }
 }
