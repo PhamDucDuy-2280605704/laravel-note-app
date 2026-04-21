@@ -3,54 +3,55 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\Note;
 use App\Models\Category;
-use Livewire\WithFileUploads; // Bắt buộc phải có để upload ảnh
-use Illuminate\Support\Facades\Auth;
 
 class NoteManager extends Component
 {
     use WithFileUploads;
 
-    public $noidung = '';
-    public $categoryId = '';
-    public $image; // Biến tạm lưu file ảnh
-    
-    // Hàm lưu Task
-    public function store()
-    {
-        $this->validate([
-            'noidung' => 'required|min:3',
-            'categoryId' => 'required',
-            'image' => 'nullable|image|max:1024', // Ảnh tối đa 1MB
-        ]);
-
-        $imagePath = null;
-        if ($this->image) {
-            // Lưu ảnh vào thư mục storage/app/public/notes
-            $imagePath = $this->image->store('notes', 'public');
-        }
-
-        Auth::user()->notes()->create([
-            'content' => $this->noidung,
-            'category_id' => $this->categoryId,
-            'image' => $imagePath,
-            'status' => 'todo',
-        ]);
-
-        // Reset form sau khi lưu
-        $this->reset(['noidung', 'categoryId', 'image']);
-        session()->flash('success', 'Đã thêm task mới thành công!');
-    }
+    public $categoryId, $noidung, $image, $iteration = 1;
 
     public function render()
     {
-        $notes = Auth::user()->notes();
         return view('livewire.note-manager', [
+            'todo' => Note::where('status', 'todo')->get(),
+            'doing' => Note::where('status', 'doing')->get(),
+            'done' => Note::where('status', 'done')->get(),
             'categories' => Category::all(),
-            'todo' => (clone $notes)->where('status', 'todo')->latest()->get(),
-            'doing' => (clone $notes)->where('status', 'doing')->latest()->get(),
-            'done' => (clone $notes)->where('status', 'done')->latest()->get(),
         ]);
+    }
+
+    public function store()
+    {
+        $this->validate([
+            'noidung' => 'required|min:5',
+            'categoryId' => 'required',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        $path = $this->image ? $this->image->store('notes_images', 'public') : null;
+
+        Note::create([
+            'content' => $this->noidung,
+            'category_id' => $this->categoryId,
+            'image' => $path,
+            'status' => 'todo',
+            'user_id' => auth()->id(),
+        ]);
+
+        $this->reset(['noidung', 'categoryId', 'image']);
+        $this->iteration++; // Để reset input file
+    }
+
+    public function updateStatus($id, $status)
+    {
+        Note::find($id)->update(['status' => $status]);
+    }
+
+    public function destroy($id)
+    {
+        Note::find($id)->delete();
     }
 }
