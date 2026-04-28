@@ -4,9 +4,16 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\DashboardController; // Thêm dòng này
+use App\Http\Controllers\DashboardController; 
 use Illuminate\Support\Facades\Route;
+use App\Livewire\CategoryManager;
+use App\Models\Category;
 
+Route::get('/danh-muc', App\Livewire\CategoryManager::class)->name('categories.index');
+
+Route::get('/calculator', function () {
+    return view('calculator');
+})->middleware(['auth']);
 // 1. Public Routes
 Route::get('/', function () { return view('welcome'); });
 

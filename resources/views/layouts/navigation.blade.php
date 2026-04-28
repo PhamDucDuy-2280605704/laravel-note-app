@@ -8,7 +8,7 @@
                     </a>
                 </div>
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex sm:items-center">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
@@ -17,8 +17,14 @@
                         {{ __('Ghi chú của tớ') }}
                     </x-nav-link>
 
+                    {{-- Nút mở máy tính trên Desktop --}}
+                    <button @click="$window.dispatchEvent(new CustomEvent('open-calc'))" 
+                            class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-orange-500 hover:border-orange-300 focus:outline-none transition duration-150 ease-in-out">
+                        {{ __('Máy tính') }}
+                    </button>
+
                     @role('admin')
-                        <div class="flex space-x-8 sm:-my-px sm:ms-4 border-l pl-4 border-gray-200">
+                        <div class="flex space-x-8 sm:-my-px sm:ms-4 border-l pl-4 border-gray-200 h-10 items-center">
                             <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" class="text-red-600 font-bold">
                                 {{ __('Quản lý Người dùng') }}
                             </x-nav-link>
@@ -62,7 +68,7 @@
             </div>
 
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -72,7 +78,7 @@
         </div>
     </div>
 
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-gray-50 border-t border-gray-100">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
@@ -82,39 +88,27 @@
                 {{ __('Ghi chú của tớ') }}
             </x-responsive-nav-link>
 
+            {{-- Nút mở máy tính trên Mobile --}}
+            <button @click="$window.dispatchEvent(new CustomEvent('open-calc')); open = false" 
+                    class="block w-full pl-3 pr-4 py-2 border-l-4 border-transparent text-left text-base font-medium text-orange-600 bg-orange-50 hover:bg-orange-100 transition duration-150">
+                {{ __('Máy tính nhanh') }}
+            </button>
+
             @role('admin')
                 <div class="border-t border-red-100 bg-red-50 mt-2">
                     <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" class="text-red-700 font-bold">
                         {{ __('Quản lý Người dùng') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.notes.all')" :active="request()->routeIs('admin.notes.all')">
-                        {{ __('Tất cả ghi chú') }}
-                    </x-responsive-nav-link>
                 </div>
             @endrole
         </div>
-
-        @auth
-            <div class="pt-4 pb-1 border-t border-gray-200">
-                <div class="px-4">
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-                </div>
-
-                <div class="mt-3 space-y-1">
-                    <x-responsive-nav-link :href="route('profile.edit')">
-                        {{ __('Profile') }}
-                    </x-responsive-nav-link>
-
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <x-responsive-nav-link :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
-                            {{ __('Log Out') }}
-                        </x-responsive-nav-link>
-                    </form>
-                </div>
-            </div>
-        @endauth
     </div>
 </nav>
+
+{{-- Nút Floating Action Button --}}
+<button @click="$window.dispatchEvent(new CustomEvent('open-calc'))" 
+        class="fixed bottom-6 right-6 bg-orange-500 text-white p-4 rounded-full shadow-2xl hover:bg-orange-600 transition-all z-[50] hover:scale-110 active:scale-95 focus:outline-none">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+    </svg>
+</button>

@@ -2,30 +2,27 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
         $categories = [
-            'Học tập',
-            'Công việc',
-            'Cá nhân',
-            'Ý tưởng',
-            'Quan trọng'
+            ['name' => 'Công việc', 'color' => 'blue'],
+            ['name' => 'Cá nhân', 'color' => 'green'],
+            ['name' => 'Học tập', 'color' => 'purple'],
+            ['name' => 'Gia đình', 'color' => 'pink'],
+            ['name' => 'Tài chính', 'color' => 'yellow'],
+            ['name' => 'Sức khỏe', 'color' => 'red'],
+            ['name' => 'Giải trí', 'color' => 'indigo'],
         ];
 
-        foreach ($categories as $name) {
-            // updateOrCreate sẽ kiểm tra cột 'name'
-            // Nếu đã có 'Học tập' trong DB, nó sẽ không tạo dòng mới nữa.
-            Category::updateOrCreate(
-                ['name' => $name], // Điều kiện tìm kiếm
-                ['name' => $name]  // Dữ liệu cập nhật/tạo mới
+        foreach ($categories as $cat) {
+            Category::firstOrCreate(
+                ['name' => $cat['name']],
+                $cat
             );
         }
     }
